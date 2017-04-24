@@ -1,4 +1,4 @@
-var  
+sevar
     twit = require('twit'),
     config = require('./config');
 
@@ -12,16 +12,16 @@ var natural_language_understanding = new NaturalLanguageUnderstandingV1({
 
 
 var parameters = {
-  'text': 'A most interesting and amusing text indeed, about as amusing as IBMs godawful documentation',
+  'text': 'I was born in Tashkent Uzbekistan, it is the Capital of Uzebkistan. Although I was born there, I have no love for my home country.',
 
   'features': {
     'entities': {
-      'emotion': false,
+      'emotion': true,
       'sentiment': true,
-      'limit': 1
+      'limit': 2
     },
     'keywords': {
-      'emotion': false,
+      'emotion': true,
       'sentiment': true,
       'limit': 2
     }
@@ -98,18 +98,11 @@ function insertIntoTable(tweets) {
 
 function calculateSentiment() {
     
-    natural_language_understanding.analyze(parameters, function(err, data) {
+    natural_language_understanding.analyze(parameters, function(err, response) {
         if (err)
             console.log('error:', err);
-        else {
-            var myData = JSON.stringify(data, null, 2);
-            //console.log(myData[0][0][0]);
-            //var json = JSON.stringify(JSON.parse(data));
-            //console.log("Score: " + json);
-            
-            //var prsed = (JSON.parse(data));
-            console.log("Parsed: " + data['keywords'][0]['sentiment'].score);
-            }
+        else
+            console.log(JSON.stringify(response, null, 2));
         }
     ); 
 }
@@ -121,7 +114,7 @@ function searchTweets() {
     var params = {
           q: 'since:2017-04-020',  // REQUIRED //goes by year-month-date
           result_type: 'recent',
-          count:'1',
+          count:'100',
           lang: 'en'
     }
     
@@ -131,7 +124,7 @@ function searchTweets() {
             console.log("Error is: " + err);
         } else {
             tweetData = data.statuses;
-            //console.log(data);
+            //console.log(tweetData);
             
             //insertIntoTable(tweetData);
         }
@@ -140,4 +133,4 @@ function searchTweets() {
 }
 
 searchTweets();
-searchTweets(doConnect, 900010);
+setInterval(doConnect, 900010);

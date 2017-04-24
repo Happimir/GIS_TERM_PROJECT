@@ -17,6 +17,6 @@ CREATE TABLE IF NOT EXISTS `gis_term`.`Tweet` (
   `region` varchar(160) NOT NULL,
   `category` varchar(160) NULL,
   `tweet` VARCHAR(160) NOT NULL,
-  `sentiment` decimal NULL,
+  `sentiment` float NULL,
   UNIQUE INDEX `id_UNIQUE` (`id` ASC)
   )ENGINE = InnoDB;

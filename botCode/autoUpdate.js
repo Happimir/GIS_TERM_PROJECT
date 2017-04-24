@@ -1,4 +1,5 @@
 var fs = require('fs');
+var mysql = require('mysql');
 
 var NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js');
 
@@ -8,6 +9,17 @@ var natural_language_understanding = new NaturalLanguageUnderstandingV1({
   'version_date': '2017-02-27'
 });
 
+
+var con = mysql.createConnection(
+{
+    
+   host: "localhost",
+   user: "root",
+   port:"3306",
+   password: "Jaljap2732!",
+   dateStrings: true,
+   datebase: "gis_term"
+});
 
 var parameters = {
   'text': 'A most interesting and amusing text indeed, about as amusing as IBMs godawful documentation',
@@ -26,6 +38,16 @@ var parameters = {
   }
 }
 
+function doConnect() {
+    
+    con.connect(function(err) {
+        if(err) {
+            console.log("Sorry Fam, error connecting");
+        }else {
+            console.log("Connection Successful")
+        }
+    });
+}
 
 var mysql = require("mysql");
 var async = require("async");
@@ -35,7 +57,14 @@ var dbSize;
     The idea of this function is simple, it will keep running and it will test to see the size of the database. If the database size is changed then it will know that new data 
     has been added, and that we need update what we have. 
 */
+
+
 function checkDataBaseSize() {
+    
+    doConnect();
+    
+    var count;
+    var iterator = 0;
     
     fs.readFile('databasesize.txt', 'utf8', function (err, data) {
        
@@ -43,11 +72,57 @@ function checkDataBaseSize() {
             console.log("Error Reading File: " + err);
         } else {
             dbSize = parseInt(data, 10);
-            console.log("DbSize: " + dbSize);
-        }
+            
+            
+            con.query("use gis_term");
+            con.query("SELECT count(*) AS count FROM tweet", function(err, rows, fields) {
         
+                if(err) {
+                    console.log("Error Querying Table For Size: " + err);
+                } else {
+                    for(var i in rows) {
+                        
+                        count = parseInt(rows[i].count, 10);
+                        console.log('Count is: '+ count);
+                        console.log("Db FIle SIze: " + dbSize);
+                        
+                        if(count != dbSize) {
+                            console.log("Our Count Is not the same");
+                            
+                            con.query('use gis_term');
+                            con.query("SELECT * FROM tweet", function(err, row) {
+                                
+                                if(err) {
+                                    console.log("Error in updating " + err);
+                                } else {
+                                    
+                                    console.log("Number of results: " + row.length);
+                                    for(var j in row) {
+                                        
+                                        con.query("UPDATE tweet SET  ? WHERE ?", [{sentiment: 0.45}, {id: row[j].id}], function(err) {
+                                            if(err) {
+                                                console.log("error: " + err);
+                                            } else {
+                                                iterator++;
+                                                console.log("Scccessfully updated");
+                                                console.log("iterator " + iterator);
+                                                if(iterator == row.length) {
+                                                    process.exit();
+                                                }
+                                                
+                                            }
+                                        });
+                                    }
+                                   
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }   
     });
-    
 }
 
 checkDataBaseSize();
+setInterval(checkDataBaseSize, 30000);
