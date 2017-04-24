@@ -2,7 +2,7 @@
   "name": "gis_term",
   "version": "1.0.0",
   "description": "GIS Term Project",
-  "main": "bot.js",
+  "main": "autoUpdate.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
