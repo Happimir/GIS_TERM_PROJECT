@@ -1,4 +1,3 @@
-sevar
     twit = require('twit'),
     config = require('./config');
 
@@ -9,24 +8,6 @@ var natural_language_understanding = new NaturalLanguageUnderstandingV1({
   'password': 'XSG0rEW0UOlB',
   'version_date': '2017-02-27'
 });
-
-
-var parameters = {
-  'text': 'I was born in Tashkent Uzbekistan, it is the Capital of Uzebkistan. Although I was born there, I have no love for my home country.',
-
-  'features': {
-    'entities': {
-      'emotion': true,
-      'sentiment': true,
-      'limit': 2
-    },
-    'keywords': {
-      'emotion': true,
-      'sentiment': true,
-      'limit': 2
-    }
-  }
-}
 
 
 var mysql = require("mysql");
@@ -48,7 +29,7 @@ var con = mysql.createConnection(
 async.series([
     doConnect,
     searchTweets,
-    //insertIntoTable
+    insertIntoTable
 ]);
 
 
@@ -67,18 +48,19 @@ function doConnect() {
 
 function insertIntoTable(tweets) {
     
-    //console.log("Tweet Inserted is: " + tweets);
+    console.log("Tweet Inserted is: " + tweets);
     
     
     for(var result in tweets) {
         
+        //Politics, Animals, Entertainment, Sports
         //console.log("Tweet Text: " + tweets[result].text);
         var parameters = {
             
-            region: 'Central',
-            category: '',
+            region: 'East',
+            category: 'Entertainment',
             tweet: tweets[result].text,
-            sentiment: '0.0'
+            sentiment: 0.0
             
         }
         
@@ -86,7 +68,7 @@ function insertIntoTable(tweets) {
         con.query("INSERT INTO tweet SET ?", parameters, function(err, rows) {
            
             if(err) {
-                //console.log("Error inserting: " + err);
+                console.log("Error inserting: " + err);
             } else {
                 console.log("Successfully Inserted Into Table");
             }
@@ -96,23 +78,14 @@ function insertIntoTable(tweets) {
     }
 }
 
-function calculateSentiment() {
-    
-    natural_language_understanding.analyze(parameters, function(err, response) {
-        if (err)
-            console.log('error:', err);
-        else
-            console.log(JSON.stringify(response, null, 2));
-        }
-    ); 
-}
 
 function searchTweets() {
     
-    calculateSentiment();
+    //q: 'since:2017-04-020',  // REQUIRED //goes by year-month-date
     
     var params = {
-          q: 'since:2017-04-020',  // REQUIRED //goes by year-month-date
+          
+          q: '#broadway',
           result_type: 'recent',
           count:'100',
           lang: 'en'
@@ -124,13 +97,13 @@ function searchTweets() {
             console.log("Error is: " + err);
         } else {
             tweetData = data.statuses;
-            //console.log(tweetData);
+            console.log(tweetData);
             
-            //insertIntoTable(tweetData);
+            insertIntoTable(tweetData);
         }
         
     });
 }
 
 searchTweets();
-setInterval(doConnect, 900010);
+setInterval(searchTweets, 900010);

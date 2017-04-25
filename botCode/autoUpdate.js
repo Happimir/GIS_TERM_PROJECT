@@ -21,14 +21,15 @@ var con = mysql.createConnection(
    datebase: "gis_term"
 });
 
+var Stext ='Death to all the muslims, death to IBMs godawful documentation as well. It must have been written by a fool!'
 var parameters = {
-  'text': 'A most interesting and amusing text indeed, about as amusing as IBMs godawful documentation',
+  'text': Stext,
 
   'features': {
     'entities': {
       'emotion': false,
       'sentiment': true,
-      'limit': 1
+      'limit': 2
     },
     'keywords': {
       'emotion': false,
@@ -58,6 +59,32 @@ var dbSize;
     has been added, and that we need update what we have. 
 */
 
+
+function calculateSentiment() {
+    
+    natural_language_understanding.analyze(parameters, function(err, data) {
+        if (err)
+            console.log('error:', err);
+        else {
+            var myData = JSON.stringify(data, null, 2);
+            //console.log(myData[0][0][0]);
+            //var json = JSON.stringify(JSON.parse(data));
+            //console.log("Score: " + json);
+            
+            //var prsed = (JSON.parse(data));
+            
+            var iterator = 0;
+            for(var i = 0; i < data['keywords'].length; i++) {
+                iterator++;
+               console.log("Parsed: " + data['keywords'][i]['sentiment'].score);
+            }
+            
+            console.log("Data Length: " + data['keywords'].length);
+            console.log("Iterator: " + iterator);
+            }
+        }
+    ); 
+}
 
 function checkDataBaseSize() {
     
@@ -124,5 +151,5 @@ function checkDataBaseSize() {
     });
 }
 
-checkDataBaseSize();
-setInterval(checkDataBaseSize, 30000);
+calculateSentiment();
+//setInterval(checkDataBaseSize, 30000);
